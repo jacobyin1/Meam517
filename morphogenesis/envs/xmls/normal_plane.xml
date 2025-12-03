@@ -1,0 +1,14 @@
+<mujoco model="normal_flat">
+  <option timestep="0.005" gravity="0 0 -9.81" density="1.2" viscosity="0.00002"/>
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture name="texplane" type="2d" builtin="checker" rgb1="0.2 0.3 0.4" rgb2="0.1 0.15 0.2"
+             width="512" height="512" mark="cross" markrgb="0.8 0.8 0.8"/>
+    <material name="matplane" reflectance="0.3" texture="texplane" texrepeat="1 1" texuniform="true"/>
+  </asset>
+
+  <worldbody>
+    <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 5" dir="0 0 -1"/>
+    <geom name="floor" pos="0 0 0" size="0 0 1" type="plane" material="matplane" friction="1 0.005 0.0001"/>
+  </worldbody>
+</mujoco>
