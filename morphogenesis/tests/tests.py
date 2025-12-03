@@ -3,11 +3,12 @@ import os
 import jax
 import jax.numpy as jnp
 from morphogenesis.envs.env_loader import load_environment
+from morphogenesis.mpc import MPC
 from morphogenesis.utils.visualizer import Visualizer
 
 # Define paths (assuming the script runs from the project root)
 CONFIG_PATH = "configs/train_normal.json"
-with open("./tests/test.xml", 'r') as f:
+with open("./tests/walker.xml", 'r') as f:
     xml_string = f.read()
 
 
@@ -153,5 +154,56 @@ def test_visualize():
     viz.render_video(rollout_states, OUTPUT_FILENAME, framerate=fps)
 
     print(f"SUCCESS: Video saved to {os.path.abspath(OUTPUT_FILENAME)}")
+
+CONFIG_PATH = "configs/test_config.json"
+OUTPUT_FILENAME = "walker_mpc_test.mp4"
+
+def main():
+    print("--- 1. Loading Walker Environment ---")
+    env = load_environment(CONFIG_PATH)
+    print(f"Action Space: {env.action_size} (Should be 6 for Walker2D)")
+    print(f"Observation Space: {env.observation_size}")
+
+    # 2. Initialize MPC
+    # Horizon 20 is good for walking (0.5 seconds ahead)
+    print("--- 2. Initializing MPC (Adam Optimizer) ---")
+    mpc = MPC(
+        env,
+        horizon=20,
+        n_updates=20,  # Grads per step
+        learning_rate=0.05  # Tuning required: start small
+    )
+
+    rng = jax.random.PRNGKey(42)
+    state = env.reset(rng)
+
+    # 3. Run Simulation
+    steps = 150
+    rollout_states = []
+
+    print(f"--- 3. Running {steps} steps ---")
+    for i in range(steps):
+        # Get optimal action
+        action, rng = mpc.get_action(state, rng)
+
+        # Step physics
+        state = env.step(state, action)
+        rollout_states.append(state)
+
+        if i % 10 == 0:
+            # Z-height is usually index 2 (x,y,z) of free joint
+            z_height = state.pipeline_state.qpos[2]
+            print(f"Step {i}: Reward={state.reward:.3f}, Z-Height={z_height:.3f}")
+
+    # 4. Render
+    print("--- 4. Saving Video ---")
+    viz = Visualizer(env)
+
+    # Calculate FPS (1 / (0.005 * 5) = 40)
+    fps = int(1.0 / (env.sys.opt.timestep * env.n_frames))
+
+    viz.render_video(rollout_states, OUTPUT_FILENAME, framerate=fps)
+    print(f"Done! Open {OUTPUT_FILENAME} to watch.")
+
 if __name__ == "__main__":
     test_environment_functionality()

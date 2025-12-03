@@ -7,8 +7,8 @@ def merge_robot_and_env(robot_xml_string: str, env_xml_path: str) -> str:
     with open(env_xml_path, 'r') as f:
         env_xml = f.read()
 
-        start_tags = ["<worldbody>", "<actuator>", "<default>"]
-        end_tags = ["</worldbody>", "</actuator>", "</default>"]
+        start_tags = ["<worldbody>", "<actuator>", "<default>", "<asset>"]
+        end_tags = ["</worldbody>", "</actuator>", "</default>", "</asset>"]
 
         for i in range(len(start_tags)):
             start_tag = start_tags[i]

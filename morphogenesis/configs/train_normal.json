@@ -3,5 +3,9 @@
   "env_name": "normal",
   "rew_list": ["speed", "ctrl"],
   "terminal_type": "none",
-  "n_frames": 10
+  "n_frames": 10,
+  "horizon": 10,
+  "n_updates:": 20,
+  "n_steps": 20,
+  "lr": 0.1
 }
