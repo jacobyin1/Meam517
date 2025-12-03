@@ -1,32 +1,81 @@
 import jax
-from brax.envs import env
+import jax.numpy as jnp
+import mujoco
+from mujoco import mjx
+from morphogenesis.utils.xml_merger import merge_robot_and_env
+from brax.envs.base import Env, ObservationSize, State
 
 
-class BaseMJXCrawler(env.Env):
+class BaseMJXEnv(Env):
     """
-    Standard Brax/MJX boilerplate.
-    Handles resetting and basic physics stepping.
+    Brax class for env wrapping.
     """
 
-    def __init__(self, xml_path, params):
-        super().__init__()
+    def __init__(self, xml_path, robot_xml_string, params, n_frames: int = 1):
         self.xml_path = xml_path
         self.params = params
-        # Load the specific XML for this environment
-        self.sys = mjx.load(xml_path)
+
+        combined_xml_string = merge_robot_and_env(robot_xml_string, xml_path)
+        self._mj_model = mujoco.MjModel.from_xml_string(combined_xml_string) # noqa
+        self.sys = mjx.put_model(self._mj_model)
+
+        self._backend = 'mjx'
+        self.n_frames = n_frames
 
     def reset(self, rng):
-        # Standard reset logic...
-        pass
+        reward = jnp.zeros(())
+        done = jnp.zeros(())
+
+        data = mjx.make_data(self.sys)
+        data = data.replace(qpos=self.sys.qpos0)
+        metrics = {}
+
+        return State(
+            pipeline_state=data, # noqa
+            obs=self._get_obs(data),
+            reward=reward,
+            done=done,
+            metrics=metrics,
+        )
 
     def step(self, state, action):
-        # Standard physics step
-        next_pipeline_state = self.pipeline_step(state.pipeline_state, action)
+        data = self.pipeline_step(state.pipeline_state, action)
+        reward = self.compute_reward(data, action)
+        done = self.check_termination(data)
+        return state.replace( # noqa
+            pipeline_state=data,
+            obs=self._get_obs(data),
+            reward=reward,
+            done=done,
+        )
 
-        # CALCULATE SPECIFIC REWARD (Polymorphism!)
-        reward = self.compute_reward(next_pipeline_state, action)
+    def pipeline_step(self, data, action):
+        def f(data, _):
+            ctrl = action
+            data = data.replace(ctrl=ctrl)
+            return mjx.step(self.sys, data), None
 
-        return state.replace(pipeline_state=next_pipeline_state), reward
+        data, _ = jax.lax.scan(f, data, (), self.n_frames)
+        return data
+
+    def _get_obs(self, data):
+        return jnp.concatenate([data.qpos[7:], data.qvel])
+
+    def check_termination(self, data):
+        raise NotImplementedError("Subclass must implement check_termination")
 
     def compute_reward(self, state, action):
-        raise NotImplementedError("Subclasses must implement this!")
+        raise NotImplementedError("Subclass must implement compute_reward")
+
+    @property
+    def observation_size(self) -> ObservationSize:
+        return self.sys.nq - 7 + self.sys.nv
+
+    @property
+    def action_size(self) -> int:
+        return self.sys.nu
+
+    @property
+    def backend(self) -> str:
+        return self._backend
+

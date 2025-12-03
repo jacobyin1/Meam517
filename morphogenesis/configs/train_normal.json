@@ -1,0 +1,7 @@
+{
+  "load_type": "combine",
+  "env_name": "normal",
+  "rew_list": ["speed", "ctrl"],
+  "terminal_type": "none",
+  "n_frames": 10
+}

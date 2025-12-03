@@ -1,1 +1,7 @@
 .idea
+morphogenesis/__pycache__/
+morphogenesis/tests/__pycache__/
+morphogenesis/envs/__pycache__/
+morphogenesis/envs/classes/__pycache__/
+morphogenesis/envs/options/__pycache__/
+morphogenesis/utils/__pycache__/
