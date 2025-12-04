@@ -26,8 +26,13 @@ class BaseMJXEnv(Env):
         reward = jnp.zeros(())
         done = jnp.zeros(())
 
+        qvel = jnp.zeros(self.sys.nv)
+        start_speed = 0.5
+        qvel = qvel.at[0].set(start_speed)
+        qvel = qvel.at[1].set(start_speed)
+
         data = mjx.make_data(self.sys)
-        data = data.replace(qpos=self.sys.qpos0)
+        data = data.replace(qpos=self.sys.qpos0, qvel=qvel)
         metrics = {}
 
         return State(

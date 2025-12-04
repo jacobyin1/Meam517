@@ -6,7 +6,7 @@ import json
 
 REWARD_MAP = {
     "speed": speed_reward,
-    "ctrl": ctrl_reward,
+    "ctrl": ctrl_cost,
     "speed_cost": speed_cost,
     "z_cost": z_cost,
     "quat_cost": quat_cost

@@ -6,7 +6,10 @@ from functools import partial
 
 
 class Shooting:
-    def __init__(self, env, n_steps: int = 10, n_updates: int = 20):
+    def __init__(self, env, n_steps: int = 10, n_updates: int = 20, config=None):
+        if config is not None:
+            n_steps = config.get("n_steps", n_steps)
+            n_updates = config.get("n_updates", n_updates)
 
         self.env = env
         self.n_steps = n_steps
@@ -37,12 +40,11 @@ class Shooting:
             # Backward pass
             plan, start_state = res
             grads = jax.jacfwd(self._trajectory_cost, argnums=0)(plan, start_state)
-            jax.debug.print("cost {}", self._trajectory_cost(plan, start_state))
+            jax.debug.print("here")
             return grads * g, None
 
         safe_cost.defvjp(f_fwd, f_bwd)
 
-        # --- SOLVER SETUP ---
         self.solver = jaxopt.LBFGSB(
             fun=safe_cost,
             maxiter=n_updates,

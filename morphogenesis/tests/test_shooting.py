@@ -35,16 +35,12 @@ def main():
     #
 
 
-    shooting = Shooting(
-        env,
-        n_steps=config["n_steps"],
-        n_updates=config["n_updates"],
-    )
+    shooting = Shooting(env, config=config)
 
     rng = jax.random.PRNGKey(0)
     state = env.reset(rng)
 
-    rollout_states = []
+    rollout_states = [state]
 
     actions, rng = shooting.get_action(state, rng)
     for i in range(config["n_steps"]):
