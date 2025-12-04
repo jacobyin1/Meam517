@@ -6,7 +6,7 @@ from functools import partial
 
 
 class Shooting:
-    def __init__(self, env, n_steps: int = 10, n_updates: int = 20, lr: float = 0.1):
+    def __init__(self, env, n_steps: int = 10, n_updates: int = 20):
 
         self.env = env
         self.n_steps = n_steps
@@ -26,12 +26,32 @@ class Shooting:
         #     optax.adam(learning_rate=lr_schedule)
         # )
 
+        @jax.custom_vjp
+        def safe_cost(plan, start_state):
+            return self._trajectory_cost(plan, start_state)
+
+        def f_fwd(plan, start_state):
+            return safe_cost(plan, start_state), (plan, start_state)
+
+        def f_bwd(res, g):
+            # Backward pass
+            plan, start_state = res
+            grads = jax.jacfwd(self._trajectory_cost, argnums=0)(plan, start_state)
+            jax.debug.print("cost {}", self._trajectory_cost(plan, start_state))
+            return grads * g, None
+
+        safe_cost.defvjp(f_fwd, f_bwd)
+
+        # --- SOLVER SETUP ---
         self.solver = jaxopt.LBFGSB(
-            fun=self._value_and_grad_fwd,
+            fun=safe_cost,
             maxiter=n_updates,
-            tol=1e-2,       # Stop early if converged
-            implicit_diff=True,
-            value_and_grad=True
+            tol=1e-2,
+            implicit_diff=False,
+            value_and_grad=False,
+            linesearch="backtracking",
+            condition="armijo",
+            maxls=10
         )
 
         # self.optimizer = optax.scale_by_lbfgs()
@@ -77,19 +97,6 @@ class Shooting:
 
         return self.plan, rng
 
-    def _value_and_grad_fwd(self, plan, start_state):
-        """
-        Custom function that computes both Cost and Gradient using Forward-Mode AD.
-        """
-        # 1. Calculate the scalar cost
-        cost = self._trajectory_cost(plan, start_state)
-
-        # 2. Calculate the gradient using jacfwd (Forward Mode)
-        # Since the output is a scalar, the Jacobian IS the gradient.
-        # This vectorizes the physics rollouts (running many in parallel).
-        grad = jax.jacfwd(self._trajectory_cost, argnums=0)(plan, start_state)
-
-        return cost, grad
 
     @partial(jax.jit, static_argnums=(0,))
     def _trajectory_cost(self, action_sequence, start_state):

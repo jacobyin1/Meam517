@@ -2,10 +2,10 @@
   "name": "train_normal",
   "load_type": "combine",
   "env_name": "normal",
-  "rew_list": ["speed", "ctrl"],
+  "reward_fns": ["speed", "ctrl", "speed_cost", "z_cost", "quat_cost"],
+  "reward_weights": [1.0, 1.0, 1.0, 1.0, 1.0],
   "terminal_type": "none",
   "n_frames": 5,
-  "n_steps": 30,
-  "n_updates": 10,
-  "lr": 0.1
+  "n_steps": 50,
+  "n_updates": 10
 }

@@ -39,7 +39,6 @@ def main():
         env,
         n_steps=config["n_steps"],
         n_updates=config["n_updates"],
-        lr=config["lr"]
     )
 
     rng = jax.random.PRNGKey(0)

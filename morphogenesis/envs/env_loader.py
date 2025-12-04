@@ -6,7 +6,10 @@ import json
 
 REWARD_MAP = {
     "speed": speed_reward,
-    "ctrl": ctrl_reward
+    "ctrl": ctrl_reward,
+    "speed_cost": speed_cost,
+    "z_cost": z_cost,
+    "quat_cost": quat_cost
 }
 
 TERMINAL_MAP = {
@@ -37,16 +40,19 @@ def load_environment(robot_xml_string, config_path):
                          n_frames=config["n_frames"])
 
     elif load_type == "combine":
-        reward_names = config.get("reward_fns", ["speed"])
+        reward_names = config["reward_fns"]
         done_name = config.get("done_fn", "none")
 
         reward_fns = [REWARD_MAP[name] for name in reward_names]
+        reward_weights = config.get("reward_weights", [1.0] * len(reward_fns))
+        reward_weights = jnp.array(reward_weights)
         done_fn = TERMINAL_MAP[done_name]
 
         return RewardMJXEnv(xml_string=xml_path,
                             robot_xml_string=robot_xml_string,
                             params=config,
                             reward_fns=reward_fns,
+                            reward_weights=reward_weights,
                             done_fn=done_fn,
                             n_frames=config["n_frames"])
     return None

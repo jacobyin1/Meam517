@@ -45,7 +45,7 @@ def main():
     state = env.reset(rng)
 
     steps = config["n_steps"]
-    rollout_states = []
+    rollout_states = [state]
 
     for i in range(steps):
         actions, rng = mpc.get_action(state, rng, n_actions=config["n_actions"])
