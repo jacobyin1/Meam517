@@ -1,9 +1,6 @@
 <mujoco model="simple_hopper">
 
-  <!-- 1. Compiler and Visual Settings -->
   <compiler angle="radian" inertiafromgeom="true"/>
-
-  <!-- 2. Defaults for Materials -->
   <default>
     <geom type="capsule" condim="1" mass="1"/>
     <joint limited="true"/>

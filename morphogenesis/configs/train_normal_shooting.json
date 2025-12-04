@@ -5,9 +5,7 @@
   "rew_list": ["speed", "ctrl"],
   "terminal_type": "none",
   "n_frames": 5,
-  "n_steps": 5,
-  "n_actions": 5,
-  "horizon": 10,
+  "n_steps": 30,
   "n_updates": 10,
-  "lr": 0.05
+  "lr": 0.1
 }
