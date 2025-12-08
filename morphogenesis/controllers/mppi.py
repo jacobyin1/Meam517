@@ -38,14 +38,15 @@ class Mppi:
     def get_actions(self, init_state, rng):
         def step_fn(carry_state, _):
             current_state, current_plan, rng = carry_state
+            jax.debug.print("ha")
             plan, new_rng = self.get_action(current_state, current_plan, rng)
-
+            jax.debug.print("here")
             action = plan[0]
             new_plan = jnp.roll(plan, shift=-1, axis=0)
             new_plan = new_plan.at[-1].set(0.0)
 
             new_state = self.env.step(current_state, action)
-
+            jax.debug.print("here1")
             return (new_state, new_plan, new_rng), (action, new_state)
 
         _, outs = jax.lax.scan(
@@ -55,7 +56,7 @@ class Mppi:
             length=self.n_steps
         )
 
-        jax.debug.print({}, outs)
+        jax.debug.print("{}", outs)
         actions, states = outs
         return actions, states
 

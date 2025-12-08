@@ -6,10 +6,6 @@ from typing import Callable, Any, List
 
 
 class RewardMJXEnv(BaseMJXEnv):
-    """
-    The final environment class that binds an XML (via BaseMJXCrawler)
-    and a specific Reward Function (via injection).
-    """
 
     def __init__(self,
                  xml_string: str,

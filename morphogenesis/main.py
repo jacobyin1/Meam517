@@ -6,7 +6,7 @@ from tests import test_shooting_params
 import os
 
 def main():
-    main()
+    test_mppi.main()
 
 if __name__ == "__main__":
     # test_environment_functionality()
