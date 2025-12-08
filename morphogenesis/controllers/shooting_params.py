@@ -6,9 +6,6 @@ import mujoco.mjx as mjx
 
 
 def get_endpoints_from_geom(pos, size, quat):
-    """
-    Reconstructs the (Start, End) points of a capsule from its MuJoCo params.
-    """
     radius = size[0]
     half_length = size[1]
     local_z = jnp.array([0., 0., 1.])
@@ -26,11 +23,6 @@ def get_endpoints_from_geom(pos, size, quat):
     return start_pos, end_pos, radius
 
 def calculate_fromto_params(start_pos, end_pos, radius):
-    """
-    Converts two points (A, B) into MuJoCo geom params (pos, size, quat).
-    Differentiable and JAX-compatible.
-    """
-
     pos = (start_pos + end_pos) / 2.0
     diff = end_pos - start_pos
     length = jnp.linalg.norm(diff)

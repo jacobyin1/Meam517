@@ -29,14 +29,8 @@ def main():
 
     shifts, actions = p_shooter.optimize()
 
-    print("\n--- 3. Constructing the New Robot ---")
     new_sys = p_shooter.update_sys(env.sys, shifts)
 
-    print(f"Original Leg Lengths (approx): {env.sys.body_pos[1:, 2]}")
-    print(f"Optimized Leg Lengths (approx): {new_sys.body_pos[1:, 2]}")
-
-    # --- NEW: SAVE TO XML ---
-    print("\n--- Saving Optimized XML ---")
     save_optimized_xml(
         xml_path=robot_xml_path,
         output_path=output_xml_path,
@@ -45,9 +39,7 @@ def main():
         end_ids=p_shooter.end_ids,
         shifts=shifts
     )
-    # ------------------------
 
-    print("\n--- 4. Running Simulation on New Robot ---")
     data = mjx.make_data(new_sys)
     rollout_states = []
 
@@ -65,22 +57,13 @@ def main():
         vx = data.qvel[0]
         print(f"Step {i}: Z-Height={z_height:.3f}, Velocity={vx:.3f}")
 
-    print("\n--- 5. Rendering ---")
-    # BONUS: Load the NEW optimized XML for the visualizer!
-    # This fixes the "Ghost Bones" issue because the renderer will now
-    # match the physics.
-
     with open(output_xml_path, 'r') as f:
         new_xml_string = f.read()
 
-    # We create a temporary env just to get the new renderer model
-    # (In a real app, you might just reload the visualizer separately)
     viz_env = load_environment(new_xml_string, config_path)
     viz = Visualizer(viz_env)
 
     fps = int(1.0 / (env.sys.opt.timestep * env.n_frames))
     viz.render_video(rollout_states, output_filename, framerate=fps)
-
-    print(f"Video saved to {os.path.abspath(output_filename)}")
 
     os.startfile(os.path.join(os.getcwd(), output_filename))

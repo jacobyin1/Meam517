@@ -40,15 +40,27 @@ def main():
     rng = jax.random.PRNGKey(0)
     state = env.reset(rng)
 
-    rollout_states = [state]
-
     actions, rng = shooting.get_action(state, rng)
-    for i in range(config["n_steps"]):
-        action = actions[i]
-        state = env.step(state, action)
-        rollout_states.append(state)
-        z_height = state.pipeline_state.qpos[2]
-        print(f"Step {i}: Reward={state.reward:.3f}, Z-Height={z_height:.3f}")
+
+    def step_fn(carry_state, action):
+            next_state = env.step(carry_state, action)
+            return next_state, next_state
+
+    _, rollout_states_pipeline = jax.lax.scan(
+        step_fn,
+        state,
+        actions
+    )
+
+    rollout_states = rollout_states_pipeline.pipeline_state
+
+    # rollout_states = [state]
+    # for i in range(config["n_steps"]):
+    #     action = actions[i]
+    #     state = env.step(state, action)
+    #     rollout_states.append(state)
+    #     z_height = state.pipeline_state.qpos[2]
+    #     print(f"Step {i}: Reward={state.reward:.3f}, Z-Height={z_height:.3f}")
 
     viz = Visualizer(env)
     fps = int(1.0 / (env.sys.opt.timestep * env.n_frames))
