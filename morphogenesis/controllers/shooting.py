@@ -90,18 +90,24 @@ class Shooting:
                 new_plan = optax.apply_updates(current_plan, updates)
                 new_plan = jnp.clip(new_plan, lower_bounds, upper_bounds)
 
-                return (new_plan, new_opt_state, new_best_plan, new_best_cost), None
+                info = {
+                    "step": step_index,
+                    "cost": cost,
+                    "max grad": jnp.max(jnp.abs(grads)),
+                }
+
+                return (new_plan, new_opt_state, new_best_plan, new_best_cost), info
 
             xs = jnp.arange(self.n_updates)
             init_opt_state = self.optimizer.init(self.plan)
-            (self.plan, _, self.best_plan, self.best_cost), _ = jax.lax.scan(
+            (self.plan, _, self.best_plan, self.best_cost), info = jax.lax.scan(
                 optimization_step,
                 (self.plan, init_opt_state, self.best_plan, self.best_cost),
                 xs,
                 length=self.n_updates
             )
 
-        return self.best_plan, rng
+        return self.best_plan, info, rng
 
 
     @partial(jax.jit, static_argnums=(0,))

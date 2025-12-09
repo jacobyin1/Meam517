@@ -4,7 +4,7 @@ import jax
 
 from morphogenesis.controllers.mppi import Mppi
 from morphogenesis.envs.env_loader import load_environment
-from morphogenesis.utils.save_info import save_mppi_log
+from morphogenesis.utils.save_info import save_log
 from morphogenesis.utils.visualizer import Visualizer
 
 CONFIG_PATH = "configs/train_normal_mppi.json"
@@ -27,7 +27,7 @@ def main():
     state = env.reset(rng)
 
     actions, rollouts, info = mppi.get_actions(rng)
-    save_mppi_log(OUTPUT_FILE_METRICS, actions, rollouts, info)
+    save_log(OUTPUT_FILE_METRICS, actions, rollouts, info)
 
     viz = Visualizer(env)
     fps = int(1.0 / (env.sys.opt.timestep * env.n_frames))

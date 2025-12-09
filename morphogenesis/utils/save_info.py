@@ -13,28 +13,27 @@ class JaxEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
-def save_mppi_log(filename, actions, states, info):
+def save_log(filename, actions, states, info):
 
     actions = jax.device_get(actions)
     states = jax.device_get(states)
     info = jax.device_get(info)
 
     state_dict = {
-        "qpos": states.pipeline_state.qpos,  # Joint positions
-        "qvel": states.pipeline_state.qvel,  # Joint velocities
-        "reward": states.reward  # Reward history
+        "qpos": states.pipeline_state.qpos,
+        "qvel": states.pipeline_state.qvel,
+        "reward": states.reward
     }
 
     output_data = {
         "config": {
-            "note": "MPPI Simulation Run"
+            "file": filename
         },
-        "info": info,  # Your cost/health logs
-        "actions": actions,  # The control inputs
-        "trajectory": state_dict  # The physical result
+        "info": info,
+        "actions": actions,
+        "trajectory": state_dict
     }
 
-    # 4. Write to file
     print(f"Saving data to {filename}...")
     with open(filename, 'w') as f:
         json.dump(output_data, f, cls=JaxEncoder, indent=4)
