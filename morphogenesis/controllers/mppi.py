@@ -120,7 +120,7 @@ class Mppi:
         )
 
         self.plan = actions
-        return actions, states.pipeline_state, info
+        return actions, states, info
 
     # def get_action(self, current_state, current_plan, rng):
     #     rng, subkey = jax.random.split(rng)

@@ -22,14 +22,14 @@ class Visualizer:
     def render_video(self, states, output_path: str = "rollout.mp4", framerate: int = 24,
                      camera_name: Optional[str] = None):
 
-        print(f"Rendering {states.qpos.shape[0]} frames to {output_path}...")
+        print(f"Rendering {states.pipeline_state.qpos.shape[0]} frames to {output_path}...")
         frames = []
 
         camera_arg = -1
         if camera_name is not None:
             camera_arg = camera_name
 
-        for jax_qpos in states.qpos:
+        for jax_qpos in states.pipeline_state.qpos:
             cpu_qpos = jax.device_get(jax_qpos)
 
             self.data.qpos[:] = cpu_qpos

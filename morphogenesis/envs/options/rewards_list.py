@@ -16,7 +16,7 @@ def speed_cost(state, action):
     return vel_cost
 
 def z_cost(state, action):
-    z_cost = (-3.0 * (state.qpos[2] - 0.5) ** 2)
+    z_cost = (-3.0 * (state.qpos[2] - 0.1) ** 2)
     # jax.debug.print("Z Cost: {z_cost}", z_cost=z_cost)
     return z_cost
 
