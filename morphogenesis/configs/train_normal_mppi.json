@@ -6,9 +6,9 @@
   "reward_weights": [1.0, 1.0, 1.0, 1.0],
   "terminal_type": "none",
   "n_frames": 10,
-  "n_steps": 200,
+  "n_steps": 100,
   "horizon": 30,
   "temperature": 1.0,
   "sigma": 0.25,
-  "n_samples": 200
+  "n_samples": 100
 }
