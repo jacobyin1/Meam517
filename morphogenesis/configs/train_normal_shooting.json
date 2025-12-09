@@ -7,7 +7,7 @@
   "terminal_type": "none",
   "n_frames": 10,
   "n_steps": 100,
-  "n_updates": 20,
+  "n_updates": 25,
   "optimizer": "gradient",
     "lr": 1e-7
 }

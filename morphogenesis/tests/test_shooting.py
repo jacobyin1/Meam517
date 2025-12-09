@@ -1,13 +1,16 @@
 import json
 import os
 import jax
+import jax.numpy as jnp
 
 from morphogenesis.controllers.shooting import Shooting
 from morphogenesis.envs.env_loader import load_environment
+from morphogenesis.utils.save_info import save_log
 from morphogenesis.utils.visualizer import Visualizer
 
 CONFIG_PATH = "configs/train_normal_shooting.json"
-OUTPUT_FILENAME = "tests/videos/walker_shooting_test.mp4"
+OUTPUT_FILE_VIDEO = "tests/videos/walker_shooting_gradient_test.mp4"
+OUTPUT_FILE_METRICS = "tests/metrics/walker_shooting_gradient_metrics.json"
 ROBOT_PATH = "./tests/walker.xml"
 with open(ROBOT_PATH, 'r') as f:
     robot_xml_string = f.read()
@@ -19,54 +22,37 @@ def main():
     with open(CONFIG_PATH, 'r') as f:
         config = json.load(f)
 
-    # rng = jax.random.PRNGKey(0)
-    # state = env.reset(rng)
-    #
-    # qpos = state.pipeline_state.qpos
-    #
-    # def single_step_cost(act):
-    #     next_state = env.step(state, act)
-    #     return -next_state.reward
-    #
-    # action = jnp.zeros(env.action_size)
-    # grad_fn = jax.jacfwd(single_step_cost)
-    # grads = grad_fn(action)
-    # print(f"Gradients: {grads}")
-    #
-
-
     shooting = Shooting(env, config=config)
-
     rng = jax.random.PRNGKey(0)
     state = env.reset(rng)
 
-    actions, rng = shooting.get_action(state, rng)
+    actions, info, rng = shooting.get_action(state, rng)
 
     def step_fn(carry_state, action):
             next_state = env.step(carry_state, action)
-            return next_state, next_state
+            new_info = {
+                **info,
+                "height": next_state.pipeline_state.qpos[2],
+                "velocity_x": next_state.pipeline_state.qvel[0],
+                "velocity_y": next_state.pipeline_state.qvel[1],
+                "action_magnitude": jnp.linalg.norm(action)
+            }
+            return next_state, (next_state, new_info)
 
-    _, rollout_states_pipeline = jax.lax.scan(
+    _, results = jax.lax.scan(
         step_fn,
         state,
         actions
     )
 
-    rollout_states = rollout_states_pipeline.pipeline_state
-
-    # rollout_states = [state]
-    # for i in range(config["n_steps"]):
-    #     action = actions[i]
-    #     state = env.step(state, action)
-    #     rollout_states.append(state)
-    #     z_height = state.pipeline_state.qpos[2]
-    #     print(f"Step {i}: Reward={state.reward:.3f}, Z-Height={z_height:.3f}")
+    rollouts, info = results
+    save_log(OUTPUT_FILE_METRICS, actions, rollouts, info)
 
     viz = Visualizer(env)
     fps = int(1.0 / (env.sys.opt.timestep * env.n_frames))
-    viz.render_video(rollout_states, OUTPUT_FILENAME, framerate=fps)
+    viz.render_video(rollouts, OUTPUT_FILE_VIDEO, framerate=fps)
 
-    os.startfile(os.path.join(os.getcwd(), OUTPUT_FILENAME))
+    os.startfile(os.path.join(os.getcwd(), OUTPUT_FILE_VIDEO))
 
 
 if __name__ == "__main__":
