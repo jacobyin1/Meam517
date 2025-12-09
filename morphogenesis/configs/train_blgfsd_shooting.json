@@ -1,0 +1,12 @@
+{
+  "name": "train_normal",
+  "load_type": "combine",
+  "env_name": "normal",
+  "reward_fns": ["speed", "speed_cost", "z_cost", "quat_cost"],
+  "reward_weights": [1.0, 1.0, 1.0, 1.0],
+  "terminal_type": "none",
+  "n_frames": 10,
+  "n_steps": 100,
+  "n_updates": 25,
+  "optimizer": "blgfsd"
+}
