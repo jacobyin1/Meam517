@@ -5,7 +5,7 @@ from morphogenesis.utils.xml_saver import save_optimized_xml
 import mujoco
 import mujoco.mjx as mjx
 
-from morphogenesis.tests.test_shooting import OUTPUT_FILENAME
+# from morphogenesis.tests.test_shooting import OUTPUT_FILENAME
 from morphogenesis.utils.visualizer import Visualizer
 from morphogenesis.controllers.shooting_params import ShootingParams
 from morphogenesis.envs.env_loader import load_environment
