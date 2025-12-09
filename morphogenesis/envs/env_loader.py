@@ -31,10 +31,11 @@ def load_environment(robot_xml_string, config_path):
     env_name = config.get("env_name", "normal")
     xml_path = XML_MAP[env_name]
     load_type = config.get("load_type", "class")
+    init_vel = config.get("init_vel", False)
 
     if load_type == "class":
         class_obj = CLASS_MAP[env_name]
-        return class_obj(xml_path=xml_path,
+        env = class_obj(xml_path=xml_path,
                          robot_xml_string=robot_xml_string,
                          params=config,
                          n_frames=config["n_frames"])
@@ -48,12 +49,13 @@ def load_environment(robot_xml_string, config_path):
         reward_weights = jnp.array(reward_weights)
         done_fn = TERMINAL_MAP[done_name]
 
-        return RewardMJXEnv(xml_string=xml_path,
+        env = RewardMJXEnv(xml_string=xml_path,
                             robot_xml_string=robot_xml_string,
                             params=config,
                             reward_fns=reward_fns,
                             reward_weights=reward_weights,
                             done_fn=done_fn,
                             n_frames=config["n_frames"])
-    return None
+
+    return env
 

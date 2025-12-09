@@ -1,5 +1,5 @@
 <mujoco model="normal_flat">
-  <option timestep="0.003" iterations="30" tolerance="0" ls_tolerance="0"
+  <option timestep="0.004" iterations="30" tolerance="0" ls_tolerance="0"
           gravity="0 0 -9.81" density="1.2" viscosity="0.00002"/>
 
   <compiler angle="degree" inertiafromgeom="true"/>

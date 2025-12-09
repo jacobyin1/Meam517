@@ -5,10 +5,10 @@
   "reward_fns": ["speed", "speed_cost", "z_cost", "quat_cost"],
   "reward_weights": [1.0, 1.0, 1.0, 1.0],
   "terminal_type": "none",
-  "n_frames": 5,
-  "n_steps": 100,
+  "n_frames": 10,
+  "n_steps": 200,
   "horizon": 30,
   "temperature": 1.0,
-  "sigma": 0.3,
-  "n_samples": 10
+  "sigma": 0.25,
+  "n_samples": 100
 }

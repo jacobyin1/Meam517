@@ -24,7 +24,7 @@ def main():
     rng = jax.random.PRNGKey(0)
     state = env.reset(rng)
 
-    actions, rollout_states = mppi.get_actions(state, rng)
+    actions, rollout_states = mppi.get_actions(rng)
     jax.debug.print("HEre")
     # rollout_states = rollout_states_pipeline.pipeline_state
 
