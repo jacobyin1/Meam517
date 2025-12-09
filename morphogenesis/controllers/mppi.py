@@ -30,7 +30,15 @@ def get_action(env_step_fn, current_state, current_plan, plan_noise, temperature
                         weights / weight_sum)
 
     new_plan = jnp.sum(weights[:, None, None] * actions, axis=0)
-    return new_plan
+
+    info = {
+        "min_cost": min_cost,
+        "mean_cost": jnp.mean(costs),
+        "effective_samples": 1.0 / jnp.sum(weights**2),
+        "weight_max": jnp.max(weights)
+    }
+
+    return new_plan, info
 
 @partial(jax.jit, static_argnames=("env_step_fn", "n_steps", "horizon", "n_samples", "action_size"))
 def _get_actions(env_step_fn,
@@ -50,17 +58,23 @@ def _get_actions(env_step_fn,
         rng, subkey = jax.random.split(rng)
         action_noise = jax.random.normal(subkey, shape=(n_samples, horizon, action_size)) * sigma
 
-        plan = get_action(env_step_fn, current_state, current_plan, action_noise, temperature)
+        plan, info = get_action(env_step_fn, current_state, current_plan, action_noise, temperature)
 
         action = plan[0]
         new_plan = jnp.roll(plan, shift=-1, axis=0)
         new_plan = new_plan.at[-1].set(0.0)
 
         new_state = env_step_fn(current_state, action)
-
+        info = {
+            **info,
+            "height": new_state.pipeline_state.qpos[2],
+            "velocity_x": new_state.pipeline_state.qvel[0],
+            "velocity_y": new_state.pipeline_state.qvel[1],
+            "action_magnitude": jnp.linalg.norm(action)
+        }
         jax.debug.print("Step {}", step_index)
 
-        return (new_state, new_plan, rng), (action, new_state)
+        return (new_state, new_plan, rng), (action, new_state, info)
 
     _, outs = jax.lax.scan(
         step_fn,
@@ -69,8 +83,8 @@ def _get_actions(env_step_fn,
         length=n_steps
     )
 
-    actions, states = outs
-    return actions, states
+    actions, states, info = outs
+    return actions, states, info
 
 
 class Mppi:
@@ -92,7 +106,7 @@ class Mppi:
     def get_actions(self, rng):
         init_plan = jnp.zeros((self.horizon, self.env.action_size))
 
-        actions, states = _get_actions(
+        actions, states, info = _get_actions(
             self.env.step,
             self.n_steps,
             self.horizon,
@@ -106,7 +120,7 @@ class Mppi:
         )
 
         self.plan = actions
-        return actions, states.pipeline_state
+        return actions, states.pipeline_state, info
 
     # def get_action(self, current_state, current_plan, rng):
     #     rng, subkey = jax.random.split(rng)

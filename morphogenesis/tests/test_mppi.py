@@ -8,6 +8,7 @@ from morphogenesis.utils.visualizer import Visualizer
 
 CONFIG_PATH = "configs/train_normal_mppi.json"
 OUTPUT_FILENAME = "tests/videos/walker_mppi_test.mp4"
+OUTPUT_FILE_METRICS = "tests/metrics/walker_mppi_metrics.json"
 ROBOT_PATH = "./tests/walker.xml"
 with open(ROBOT_PATH, 'r') as f:
     robot_xml_string = f.read()
@@ -24,9 +25,9 @@ def main():
     rng = jax.random.PRNGKey(0)
     state = env.reset(rng)
 
-    actions, rollout_states = mppi.get_actions(rng)
-    jax.debug.print("HEre")
-    # rollout_states = rollout_states_pipeline.pipeline_state
+    actions, rollout_states, info = mppi.get_actions(rng)
+    with open(OUTPUT_FILE_METRICS, "w") as f:
+        json.dump(info, f, indent=4)
 
     viz = Visualizer(env)
     fps = int(1.0 / (env.sys.opt.timestep * env.n_frames))
