@@ -8,5 +8,5 @@
   "n_frames": 10,
   "n_steps": 100,
   "n_updates": 25,
-  "optimizer": "blgfsd"
+  "optimizer": "lbfgs"
 }

@@ -8,9 +8,9 @@ from morphogenesis.envs.env_loader import load_environment
 from morphogenesis.utils.save_info import save_log
 from morphogenesis.utils.visualizer import Visualizer
 
-CONFIG_PATH = "configs/train_normal_shooting.json"
-OUTPUT_FILE_VIDEO = "tests/videos/walker_shooting_gradient_test.mp4"
-OUTPUT_FILE_METRICS = "tests/metrics/walker_shooting_gradient_metrics.json"
+CONFIG_PATH = "configs/train_lbfgs_shooting.json"
+OUTPUT_FILE_VIDEO = "tests/videos/walker_shooting_lbfgs_test.mp4"
+OUTPUT_FILE_METRICS = "tests/metrics/walker_shooting_lbfgs_metrics.json"
 ROBOT_PATH = "./tests/walker.xml"
 with open(ROBOT_PATH, 'r') as f:
     robot_xml_string = f.read()

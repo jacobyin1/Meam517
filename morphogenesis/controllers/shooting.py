@@ -72,6 +72,12 @@ class Shooting:
 
             self.plan = results.params
 
+            info = {
+                "cost": results.state.value,
+                "error": results.state.error,
+                "iters": results.state.iter_num
+            }
+
         if self.opt_type == "gradient":
             def optimization_step(carry, step_index):
                 current_plan, current_opt_state, best_plan, best_cost = carry
