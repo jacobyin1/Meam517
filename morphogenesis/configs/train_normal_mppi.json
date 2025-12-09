@@ -10,5 +10,5 @@
   "horizon": 30,
   "temperature": 1.0,
   "sigma": 0.25,
-  "n_samples": 100
+  "n_samples": 200
 }
